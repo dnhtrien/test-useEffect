@@ -1,36 +1,44 @@
 import './App.css';
 import './component/component.css';
 import { useEffect, useState } from 'react';
-//----------------------------------------------
-//----------------------------------------------
 
 export default function App() {
-  const [color, setColor] = useState('green');
-
+  const [question, setQuestion] = useState('');
+  const [stop, setStop] = useState(false);
   const [time, setTime] = useState(0);
+
   const handleReset = () => {
     setTime(0);
-    setColor('green');
+    setStop(!stop);
+    setQuestion('');
   };
-
-  const handleStartTime = () => {
-    setTime(time + 1);
-    setColor('red');
+  const handleClick = () => {
+    setStop(!stop);
   };
+  useEffect(() => {
+    if (time % 5 === 1) {
+      fetch('https://catfact.ninja/fact')
+        .then((res) => res.json())
+        .then((data) => setQuestion(data));
+    }
+  }, [time]);
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     handleStartTime();
-  //   }, 1000);
-  // }, [time]);
+  useEffect(() => {
+    if (stop === true) {
+      const timerId = setInterval(() => {
+        setTime((prevState) => prevState + 1);
+      }, 1000);
+      return () => clearInterval(timerId);
+    }
+  }, [stop]);
 
   return (
     <div className="App">
       <h1>Vi du UseEffect() Hook</h1>
       <p>{time}</p>
       <div className="button">
-        <button type="button" className="inside" style={{ backgroundColor: color, width: '120px', height: ' 30px' }} onClick={handleStartTime}>
-          Start
+        <button type="button" className="inside" style={{ backgroundColor: stop ? 'red' : 'green', width: '120px', height: ' 30px' }} onClick={handleClick}>
+          <p>{stop ? 'Stop' : 'Start'}</p>
         </button>
       </div>
       <div className="button">
@@ -38,7 +46,7 @@ export default function App() {
           Reset
         </button>
       </div>
-      <h1>Cau hoi truyen len</h1>
+      <h1>{question.fact}</h1>
     </div>
   );
 }
